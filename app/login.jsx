@@ -1,9 +1,9 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import React, { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   View,
   Text,
   TextInput,
@@ -11,17 +11,17 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // expo icons
+import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [secure, setSecure] = useState(true);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    console.log("Login function");
     const now = new Date();
     const formattedTime = now.toLocaleTimeString([], {
       hour: "2-digit",
@@ -34,20 +34,52 @@ const Login = () => {
     });
 
     if (email && password) {
-      Toast.show({
-        type: "success",
-        text1: "Login Successful 🎉",
-        text2: `You are successfully logged in at ${formattedTime}, ${formattedDate}`,
-        position: "top",
-      });
+      try {
+        console.log(" API");
+        const response = await fetch(
+          "http://192.168.18.77:3000/api/attendance/loginOnly",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, empPassword: password }),
+          }
+        );
 
-      router.replace("/(tabs)/home");
+        const data = await response.json();
+
+        console.log("Response data: ", data);
+
+        if (response.ok) {
+          await AsyncStorage.setItem("token", data.token);
+          Toast.show({
+            type: "success",
+            text1: "Login Successful",
+            text2: `You are successfully logged in at ${formattedTime}, ${formattedDate}`,
+            position: "top",
+          });
+          router.replace("/(tabs)/home");
+        } else {
+          Toast.show({
+            type: "error",
+            text1: "Login Failed",
+            text2: data.message || "Invalid email or password",
+
+            position: "top",
+          });
+        }
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          text1: "Network Error",
+          text2: `Something went wrong. Please try again later.. ${error}`,
+          position: "top",
+        });
+      }
     } else {
-      // ❌ Error toast
       Toast.show({
         type: "error",
-        text1: "Login Failed ❌",
-        text2: "Please enter valid email and password",
+        text1: "Login Failed",
+        text2: "Please enter valid email and password.",
         position: "top",
       });
     }
@@ -59,24 +91,17 @@ const Login = () => {
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Logo */}
         <Image
           source={require("../assets/crystal-cube.png")}
           style={styles.logo}
         />
-
-        {/* Title */}
         <Text style={styles.title}>
           Welcome Back to{"\n"}
           <Text style={styles.titleBlue}>HR Attendee</Text>
         </Text>
-
-        {/* Subtitle */}
         <Text style={styles.subtitle}>
           Hello there, login to mark attendance
         </Text>
-
-        {/* Inputs */}
         <TextInput
           style={styles.input}
           placeholder="Email or Username"
@@ -84,8 +109,6 @@ const Login = () => {
           value={email}
           onChangeText={setEmail}
         />
-
-        {/* Password with show/hide */}
         <View style={styles.passwordContainer}>
           <TextInput
             placeholder="Password"
@@ -102,7 +125,6 @@ const Login = () => {
             />
           </TouchableOpacity>
         </View>
-
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
