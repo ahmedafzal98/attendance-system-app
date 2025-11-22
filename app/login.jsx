@@ -47,7 +47,7 @@ const Login = () => {
 
       try {
         const res = await fetch(
-          "http://192.168.18.77:3000/api/attendance/checkToken",
+          "https://attendance-system-frontend-v141.onrender.com/api/attendance/checkToken",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -72,7 +72,7 @@ const Login = () => {
 
     try {
       const res = await fetch(
-        "http://192.168.18.77:3000/api/attendance/loginOnly",
+        "https://attendance-system-frontend-v141.onrender.com/api/attendance/loginOnly",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
