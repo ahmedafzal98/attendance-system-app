@@ -69,7 +69,7 @@ export default function Attendance() {
       // ------------------ CHECK IN ------------------
       if (!checkedIn) {
         const res = await fetch(
-          "http://192.168.18.77:3000/api/attendance/checkIn",
+          "https://attendance-system-frontend-v141.onrender.com/api/attendance/checkIn",
           {
             method: "POST",
             headers: {
@@ -101,7 +101,7 @@ export default function Attendance() {
       // ------------------ CHECK OUT ------------------
       else {
         const res = await fetch(
-          "http://192.168.18.77:3000/api/attendance/checkOut",
+          "https://attendance-system-frontend-v141.onrender.com/api/attendance/checkOut",
           {
             method: "POST",
             headers: {
