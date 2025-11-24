@@ -48,6 +48,7 @@ const Login = () => {
       try {
         const res = await fetch(
           "https://attendance-system-backend-n5c2.onrender.com/api/attendance/checkToken",
+
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -73,6 +74,7 @@ const Login = () => {
     try {
       const res = await fetch(
         "https://attendance-system-backend-n5c2.onrender.com/api/attendance/loginOnly",
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

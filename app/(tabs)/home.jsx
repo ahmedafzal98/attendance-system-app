@@ -80,7 +80,8 @@ export default function Attendance() {
       // ------------------ CHECK IN ------------------
       if (!checkedIn) {
         const res = await fetch(
-          "https://attendance-system-backend-n5c2.onrender.com/api/attendance/checkIn",
+          "https://attendance-system-frontend-v141.onrender.com/api/attendance/checkIn",
+
           {
             method: "POST",
             headers: {
@@ -113,6 +114,7 @@ export default function Attendance() {
       else {
         const res = await fetch(
           "https://attendance-system-backend-n5c2.onrender.com/api/attendance/checkOut",
+
           {
             method: "POST",
             headers: {
