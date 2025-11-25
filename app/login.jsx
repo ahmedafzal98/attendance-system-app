@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SafeAreaView,
   ScrollView,
@@ -21,35 +22,57 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [secure, setSecure] = useState(true);
 
-  const handleLogin = () => {
-    const now = new Date();
-    const formattedTime = now.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const formattedDate = now.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
 
-    if (email && password) {
-      Toast.show({
-        type: "success",
-        text1: "Login Successful 🎉",
-        text2: `You are successfully logged in at ${formattedTime}, ${formattedDate}`,
-        position: "top",
-      });
+      try {
+        const res = await fetch(
+          "https://attendance-system-backend-n5c2.onrender.com/api/attendance/checkToken",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      router.replace("/(tabs)/home");
-    } else {
-      // ❌ Error toast
-      Toast.show({
-        type: "error",
-        text1: "Login Failed ❌",
-        text2: "Please enter valid email and password",
-        position: "top",
-      });
+        const data = await res.json();
+
+        if (await handleTokenExpiry(data.message)) return;
+
+        if (res.ok) router.replace("/(tabs)/home");
+      } catch {
+        await AsyncStorage.removeItem("token");
+      }
+    };
+
+    checkToken();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Toast.show({ type: "error", text1: "Missing Fields" });
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "https://attendance-system-backend-n5c2.onrender.com/api/attendance/loginOnly",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, empPassword: password }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        await AsyncStorage.setItem("token", data.token);
+        Toast.show({ type: "success", text1: "Login Successful" });
+        router.replace("/(tabs)/home");
+      } else {
+        Toast.show({ type: "error", text1: data.message });
+      }
+    } catch (e) {
+      Toast.show({ type: "error", text1: "Network Error" });
     }
   };
 
