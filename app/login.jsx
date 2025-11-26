@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 
-// 🔥 TOKEN EXPIRY HANDLER
+//Token expiry
 const handleTokenExpiry = async (msg) => {
   if (
     msg === "jwt expired" ||
@@ -36,16 +36,15 @@ const handleTokenExpiry = async (msg) => {
   return false;
 };
 
-// 🔹 Device Gateway Calculation
+//Device Gateway Ip
 const getGatewayIp = async () => {
   try {
     const deviceIp = await Network.getIpAddressAsync(); // device IP
-    console.log("Device IP:", deviceIp);
 
     const parts = deviceIp.split(".");
     if (parts.length === 4) {
-      const gatewayIp = `${parts[0]}.${parts[1]}.${parts[2]}.1`; // last octet .1
-      console.log("Calculated Gateway IP:", gatewayIp);
+      const gatewayIp = `${parts[0]}.${parts[1]}.${parts[2]}.1`;
+
       return gatewayIp;
     }
     return null;
@@ -110,6 +109,7 @@ const Login = () => {
 
       if (res.ok) {
         await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("employeeName", data.employee.FName);
         Toast.show({ type: "success", text1: "Login Successful" });
         router.replace("/(tabs)/home");
       } else {

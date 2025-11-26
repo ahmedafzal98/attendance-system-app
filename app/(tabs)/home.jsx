@@ -14,7 +14,20 @@ import Toast from "react-native-toast-message";
 import { router } from "expo-router";
 import ActivitySection from "../../components/activitySection";
 
-// 🔥 TOKEN EXPIRY HANDLER HERE
+const formatTo12Hour = (isoTime) => {
+  if (!isoTime) return "--:--";
+
+  let timePart = isoTime.split("T")[1].split(".")[0];
+  let [hour, minute] = timePart.split(":");
+
+  hour = parseInt(hour);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+
+  return `${hour}:${minute} ${ampm}`;
+};
+
+//TOKEN EXPIRY
 const handleTokenExpiry = async (msg) => {
   if (
     msg === "jwt expired" ||
@@ -84,7 +97,7 @@ export default function Attendance() {
         if (await handleTokenExpiry(data.message)) return;
 
         if (res.ok) {
-          const time = data.attendance.CheckIn.split("T")[1].substr(0, 5);
+          const time = formatTo12Hour(data.attendance.CheckIn);
           setCheckedIn(true);
           setCheckInTime(time);
 
@@ -141,8 +154,6 @@ export default function Attendance() {
     );
   }
 
-  // UI BELOW IS SAME – untouched
-
   const dates = Array.from({ length: 7 }, (_, i) => {
     let d = new Date();
     d.setDate(today.getDate() + (i - 3));
@@ -157,7 +168,7 @@ export default function Attendance() {
           style={styles.avatar}
         />
         <View>
-          <Text style={styles.name}>Ahmed Afzal</Text>
+          <Text style={styles.name}>Welcome Back</Text>
           <Text style={styles.designation}>Software Engineer</Text>
         </View>
       </View>
