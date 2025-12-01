@@ -3,10 +3,10 @@ name: Build Android APK
 on:
   push:
     branches:
-      - main # Trigger workflow on pushes to main branch
+      - main
   pull_request:
     branches:
-      - main # Optional: also run on PRs to main
+      - main
 
 jobs:
   build:
@@ -21,12 +21,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20" # Replace with the Node version your project uses
+          node-version: "20" # replace with your project Node version
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
-        working-directory: ./ # Root of the repo
+        working-directory: ./ # root of repo
 
       # Step 4: Set up JDK 17
       - name: Set up JDK
@@ -46,12 +46,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      # Step 6: Build APK
+      # Step 6: Set Node environment for Gradle scripts
+      - name: Set Node environment variable
+        run: echo "NODE_BINARY=$(which node)" >> $GITHUB_ENV
+
+      # Step 7: Clean Gradle build
+      - name: Clean Gradle
+        working-directory: android
+        run: ./gradlew clean
+
+      # Step 8: Build Release APK
       - name: Build Release APK
         working-directory: android
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease -x lint -Pandroid.injected.cmake.build-type=Release
+        env:
+          CXXFLAGS: "-Wno-deprecated-declarations" # ignore deprecated warnings in C++ modules
 
-      # Step 7: Upload the APK artifact
+      # Step 9: Upload the APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
